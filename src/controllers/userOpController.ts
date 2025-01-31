@@ -26,12 +26,14 @@ export const sendUserOpHandler = async (
       jsonrpc: jsonrpc,
       txHash: result.txHash,
       id,
+      status: "success",
     });
   } else {
     return res.status(500).json({
       jsonrpc: "2.0",
       error: { code: -32000, message: "Execution error", data: result.error },
       id,
+      status: "failure",
     });
   }
 };
