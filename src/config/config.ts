@@ -14,8 +14,8 @@ export const publicClient = createPublicClient({
   transport: http(RPC_URL),
 });
 
-const account1 = privateKeyToAccount(EOA1_PRIVATE_KEY as Hex);
-const account2 = privateKeyToAccount(EOA2_PRIVATE_KEY as Hex);
+export const account1 = privateKeyToAccount(EOA1_PRIVATE_KEY as Hex);
+export const account2 = privateKeyToAccount(EOA2_PRIVATE_KEY as Hex);
 
 // Initialize wallet clients (EOAs)
 export const eoa1 = createWalletClient({

@@ -6,10 +6,11 @@ import {
 } from "../config/config";
 import { Hex } from "viem";
 import { entrypointabi } from "../abis/entrypointabi";
+import { selectEOA } from "./selectEoa";
 
 export const executeUserOp = async (userOp: any, beneficiary: string) => {
-  // Alternate between EOAs
-  const eoa = Math.random() < 0.5 ? eoa1 : eoa2;
+  // Select the EOA to use
+  const eoa = await selectEOA();
 
   // Send the transaction
   const txHash = await eoa.writeContract({
