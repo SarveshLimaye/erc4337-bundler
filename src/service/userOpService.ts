@@ -1,6 +1,10 @@
+import { UserOperation } from "../schema/schema";
 import { executeUserOp } from "../handler/executeUserOp";
 
-export const sendUserOperation = async (userOp: any, beneficiary: string) => {
+export const sendUserOperation = async (
+  userOp: UserOperation,
+  beneficiary: string
+) => {
   try {
     const result = await executeUserOp(userOp, beneficiary);
     return { success: true, txHash: result.txHash };

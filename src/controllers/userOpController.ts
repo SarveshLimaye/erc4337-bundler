@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { sendUserOperation } from "../service/userOpService";
+import { UserOperation } from "../schema/schema";
 
 export const sendUserOpHandler = async (
   req: Request,
@@ -15,7 +16,8 @@ export const sendUserOpHandler = async (
     });
   }
 
-  const [userOp, beneficiary] = params;
+  const userOp: UserOperation = params[0];
+  const beneficiary: string = params[1];
 
   const result = await sendUserOperation(userOp, beneficiary);
 
