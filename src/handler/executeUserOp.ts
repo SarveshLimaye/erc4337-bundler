@@ -7,11 +7,15 @@ import {
 import { Hex } from "viem";
 import { entrypointabi } from "../abis/entrypointabi";
 import { selectEOA } from "./selectEoa";
+import { validateRequest } from "./validations";
 
 export const executeUserOp = async (userOp: any, beneficiary: string) => {
   // Select the EOA to use
   const eoa = await selectEOA();
 
+  // Further validation checks here -
+
+  await validateRequest(userOp, ENTRY_POINT_ADDRESS as Hex);
   // Send the transaction
   const txHash = await eoa.writeContract({
     address: ENTRY_POINT_ADDRESS as Hex,
