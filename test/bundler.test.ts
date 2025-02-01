@@ -10,7 +10,13 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { createWalletClient, http, parseUnits, publicActions } from "viem";
+import {
+  Address,
+  createWalletClient,
+  http,
+  parseUnits,
+  publicActions,
+} from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { executeUserOp } from "../src/handler/executeUserOp";
 import { sepolia } from "viem/chains";
@@ -20,6 +26,8 @@ import {
   createSmartAccountClient,
   UserOperationStruct,
 } from "@biconomy/account";
+import { validateRequest } from "../src/handler/validations";
+import { UserOperation } from "viem/account-abstraction";
 
 dotEnvConfig();
 
@@ -144,5 +152,70 @@ describe("eth_sendUserOperation", () => {
 
     expect(result).toHaveProperty("txHash");
     expect(result.receipt.status).toContain("success");
+  });
+
+  it("should throw an error if verificationGasLimit is less than 10000", async () => {
+    const invalidUserOp: UserOperation = {
+      sender: await smartAccount.getAccountAddress(),
+      nonce: await smartAccount.getNonce(),
+      initCode: "0x",
+      callData: await smartAccount.encodeExecute(tx.to, tx.value, "0x"),
+      callGasLimit: 1n,
+      verificationGasLimit: 9999n, // Invalid value
+      preVerificationGas: 1n,
+      maxFeePerGas: 1n,
+      maxPriorityFeePerGas: 1n,
+      paymasterAndData: "0x",
+      signature: "0x",
+    };
+
+    const entryPoint: Address = process.env.ENTRY_POINT_ADDRESS! as Address;
+    await expect(validateRequest(invalidUserOp, entryPoint)).rejects.toThrow(
+      "verificationGasLimit must be at least 10000"
+    );
+  });
+
+  it("should throw an error if gas limits are zero", async () => {
+    const invalidUserOp: UserOperation = {
+      sender: await smartAccount.getAccountAddress(),
+      nonce: await smartAccount.getNonce(),
+      initCode: "0x",
+      callData: await smartAccount.encodeExecute(tx.to, tx.value, "0x"),
+      callGasLimit: 0n, // Invalid value
+      verificationGasLimit: 70649n,
+      preVerificationGas: 0n, // Invalid value
+      maxFeePerGas: 1n,
+      maxPriorityFeePerGas: 1n,
+      paymasterAndData: "0x",
+      signature: "0x",
+    };
+
+    const entryPoint: Address = process.env.ENTRY_POINT_ADDRESS! as Address;
+
+    await expect(validateRequest(invalidUserOp, entryPoint)).rejects.toThrow(
+      "user operation gas limits must be larger than 0"
+    );
+  });
+
+  it("should throw an error if nonce is invalid", async () => {
+    const invalidUserOp: UserOperation = {
+      sender: await smartAccount.getAccountAddress(),
+      nonce: 9999n, // Invalid nonce
+      initCode: "0x",
+      callData: await smartAccount.encodeExecute(tx.to, tx.value, "0x"),
+      callGasLimit: 1n,
+      verificationGasLimit: 10000n,
+      preVerificationGas: 1n,
+      maxFeePerGas: 1n,
+      maxPriorityFeePerGas: 1n,
+      paymasterAndData: "0x",
+      signature: "0x",
+    };
+
+    const entryPoint: Address = process.env.ENTRY_POINT_ADDRESS! as Address;
+
+    await expect(validateRequest(invalidUserOp, entryPoint)).rejects.toThrow(
+      "AA25 invalid account nonce"
+    );
   });
 });
