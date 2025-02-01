@@ -13,6 +13,7 @@ import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import {
   Address,
   createWalletClient,
+  Hex,
   http,
   parseUnits,
   publicActions,
@@ -46,7 +47,7 @@ describe("eth_sendUserOperation", () => {
 
   const topUpSmartAccountValue = parseUnits("0.1", 18);
 
-  const account = privateKeyToAccount(`0x${privateKey}`);
+  const account = privateKeyToAccount(privateKey as Hex);
 
   const signer = createWalletClient({
     account,
